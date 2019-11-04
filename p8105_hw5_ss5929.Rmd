@@ -1,0 +1,68 @@
+---
+title: "ss5929"
+author: "Shuyi SHEN"
+date: "11/2/2019"
+output: github_document
+---
+## Problem 1
+```{r}
+library(tidyverse)
+library(purrr)
+library(ggplot2)
+
+set.seed(10)
+
+iris_with_missing = iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species)) 
+
+fill_miss = function(x){
+
+  mean_value=mean(x,na.rm = TRUE)
+  
+  if(is.numeric(x)){
+    replace_na(x,mean_value)
+  }else if(is.character(x)){
+    replace_na(x,"virginica")
+  }
+}
+
+iris_fill_miss = map(iris_with_missing,fill_miss) 
+
+```
+
+
+
+## Problem 2
+```{r}
+all_files = list.files(path="data",full.names = T) 
+
+longi_data = all_files %>% map(read_csv) %>% reduce(rbind)
+
+longi_table = longi_data %>% 
+                   mutate(
+                     ID=c(1:10,1:10),
+                     sample=c(rep("control",10),rep("experiment",10))
+                   )
+
+longi_pivot=longi_table %>% 
+               pivot_longer(
+                 week_1:week_8,
+                 names_to = "week_num",
+                 values_to = "value"
+               ) 
+
+longi_pivot %>% 
+  filter(sample=="control") %>% 
+  ggplot(aes(x=week_num,y=value,group=ID))+
+  geom_line(aes(color=ID))+
+  labs(
+    x="ID",
+    y="value"
+  )
+
+
+
+```
+
+
