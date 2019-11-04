@@ -9,6 +9,7 @@ output: github_document
 library(tidyverse)
 library(purrr)
 library(ggplot2)
+library(broom)
 
 set.seed(10)
 
@@ -64,5 +65,184 @@ longi_pivot %>%
 
 
 ```
+
+## Problem 3 
+### the function
+```{r}
+sim_regression = function(beta_1, beta_0 = 2,n=30) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = 0, sd = 1),
+    y = beta_0 + beta_1 * x + rnorm(n, 0, 50)
+  )
+  
+  ls_fit = lm(y ~ x, data = sim_data)
+  
+  c(
+    tidy(ls_fit)[2,2],
+    tidy(ls_fit)[2,5]
+  )
+  
+}
+
+sim_regression(0) 
+```
+
+### repeat
+```{r}
+# 0
+output_0 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_0[[i]] =sim_regression(0)
+}
+
+sim_results_0 = bind_rows(output_0) %>% 
+    mutate(
+      true_value = c(rep(0,10000))
+          )
+
+
+# 1
+output_1 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_1[[i]] =sim_regression(1)
+}
+
+sim_results_1 = bind_rows(output_1) %>% 
+  mutate(
+      true_value = c(rep(1,10000))
+          )
+
+
+# 2
+output_2 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_2[[i]] =sim_regression(2)
+}
+
+sim_results_2 = bind_rows(output_2) %>% 
+  mutate(
+      true_value = c(rep(2,10000))
+          )
+
+
+# 3
+output_3 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_3[[i]] =sim_regression(3)
+}
+
+sim_results_3 = bind_rows(output_3) %>% 
+  mutate(
+      true_value = c(rep(3,10000))
+          )
+
+
+# 4
+output_4 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_4[[i]] =sim_regression(4)
+}
+
+sim_results_4 = bind_rows(output_4) %>% 
+  mutate(
+      true_value = c(rep(4,10000))
+          )
+
+
+# 5
+output_5 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_5[[i]] =sim_regression(5)
+}
+
+sim_results_5 = bind_rows(output_5) %>% 
+  mutate(
+      true_value = c(rep(5,10000))
+          )
+
+
+# 6
+output_6 = vector("list", 10000)
+
+for (i in 1:10000) {
+  output_6[[i]] =sim_regression(6)
+}
+
+sim_results_6 = bind_rows(output_6) %>% 
+  mutate(
+      true_value = c(rep(6,10000))
+          )
+
+
+sim_results = rbind(sim_results_0,
+                    sim_results_1,
+                    sim_results_2,
+                    sim_results_3,
+                    sim_results_4,
+                    sim_results_5,
+                    sim_results_6) %>% 
+  mutate(
+    decision=ifelse(p.value<0.05,"reject null","accept null")
+  ) 
+
+```
+
+### first plot
+```{r}
+sim_results %>%
+  select(true_value,decision) %>% 
+  filter(decision=="reject null") %>% 
+  group_by(true_value) %>% 
+  count(decision)%>%
+  mutate(proportion=n/10000) %>%  
+  ggplot(aes(x=true_value,y=proportion))+
+  geom_line()+
+  labs(
+    x="True Value",
+    y="Proportion",
+    title="The Power and True Value Distribution"
+  )
+  
+```
+
+
+### second plot
+```{r}
+sim_results %>%
+  select(estimate,true_value) %>% 
+  group_by(true_value) %>% 
+  summarise(mean=mean(estimate)) %>%
+  ggplot(aes(x=true_value,y=mean))+
+  geom_line()+
+  labs(
+    x="True Value",
+    y="Mean",
+    title="The Mean of Estimate and True Value Distribution"
+  )
+
+sim_results %>%
+  filter(decision=="reject null") %>%
+  select(estimate,true_value) %>% 
+  group_by(true_value) %>% 
+  summarise(mean=mean(estimate)) %>%
+  ggplot(aes(x=true_value,y=mean))+
+  geom_line()+
+  labs(
+    x="True Value",
+    y="Mean",
+    title="The Mean of Estimate and True Value Distribution"
+  )
+  
+```
+
+
+
 
 
