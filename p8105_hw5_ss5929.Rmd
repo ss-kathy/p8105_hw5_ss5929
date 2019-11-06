@@ -69,11 +69,13 @@ longi_pivot %>%
 ## Problem 3 
 ### the function
 ```{r}
+set.seed(1)
+
 sim_regression = function(beta_1, beta_0 = 2,n=30) {
   
   sim_data = tibble(
     x = rnorm(n, mean = 0, sd = 1),
-    y = beta_0 + beta_1 * x + rnorm(n, 0, 50)
+    y = beta_0 + beta_1 * x + rnorm(n, 0, sqrt(50))
   )
   
   ls_fit = lm(y ~ x, data = sim_data)
@@ -181,7 +183,7 @@ sim_results_6 = bind_rows(output_6) %>%
           )
 
 
-sim_results = rbind(sim_results_0,
+sim_results = rbind(
                     sim_results_1,
                     sim_results_2,
                     sim_results_3,
