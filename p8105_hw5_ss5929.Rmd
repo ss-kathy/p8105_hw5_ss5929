@@ -10,6 +10,7 @@ library(tidyverse)
 library(purrr)
 library(ggplot2)
 library(broom)
+library(stringr)
 
 set.seed(10)
 
@@ -17,47 +18,59 @@ iris_with_missing = iris %>%
   map_df(~replace(.x, sample(1:150, 20), NA)) %>%
   mutate(Species = as.character(Species)) 
 
-fill_miss = function(x){
+mean(iris_with_missing$Sepal.Length,na.rm=T)
 
-  mean_value=mean(x,na.rm = TRUE)
+fill_miss = function(x){
   
   if(is.numeric(x)){
+    mean_value=mean(x,na.rm = TRUE)
     replace_na(x,mean_value)
   }else if(is.character(x)){
     replace_na(x,"virginica")
   }
 }
 
-iris_fill_miss = map(iris_with_missing,fill_miss) 
+iris_fill_miss = map(iris_with_missing,fill_miss) %>% bind_cols()
+iris_fill_miss %>% view
 
 ```
+*comment*
 
+**iris**
 
+There are `r ncol(iris_fill_miss)` rows and `r nrow(iris_fill_miss)` columns in the `iris` dataset. The mean of `Sepal.Length` is `5.82`, `Sepal.Width` is `3.08`, `Petal.Length` is `3.77` and `Petal.Width` is `1.19`
 
 ## Problem 2
 ```{r}
 all_files = list.files(path="data",full.names = T) 
 
-longi_data = all_files %>% map(read_csv) %>% reduce(rbind)
 
-longi_table = longi_data %>% 
-                   mutate(
-                     ID=c(1:10,1:10),
+longi_data = all_files %>% 
+  map(read_csv) %>%
+  reduce(rbind) %>% 
+  cbind(all_files) 
+
+longi_table = longi_data %>%
+              rename(subject=all_files) %>% 
+              transform(subject=str_replace(subject,"data/","")) %>% 
+              transform(subject=str_replace(subject,".csv","")) %>% 
+              mutate(
                      sample=c(rep("control",10),rep("experiment",10))
                    )
 
-longi_pivot=longi_table %>% 
+longi_pivot=longi_table %>%
                pivot_longer(
                  week_1:week_8,
                  names_to = "week_num",
                  values_to = "value"
-               ) 
+               )
+  
 
 longi_pivot %>% 
-  filter(sample=="control") %>% 
-  ggplot(aes(x=week_num,y=value,group=ID))+
-  geom_line(aes(color=ID))+
+  ggplot(aes(x=week_num,y=value,color=sample))+
+  geom_line(aes(group=subject))+
   labs(
+    color = "subject",
     x="ID",
     y="value"
   )
@@ -65,6 +78,9 @@ longi_pivot %>%
 
 
 ```
+*comment*
+
+From the plot, we can see that control group will actually remain at a steady level while the experiment group will increase gradually.
 
 ## Problem 3 
 ### the function
@@ -89,6 +105,7 @@ sim_regression = function(beta_1, beta_0 = 2,n=30) {
 
 sim_regression(0) 
 ```
+
 
 ### repeat
 ```{r}
@@ -213,10 +230,18 @@ sim_results %>%
   )
   
 ```
+*comment*
+
+From the plot, we can see that as the power increases as the effect size of beta1 increases. When beta1 equals 0, the proportion indicates alpha with different meaning of rest values. Therefore, I do not include it in the plot.
 
 
-### second plot
 ```{r}
+reject_results = sim_results %>%
+  filter(decision=="reject null") %>%
+  select(estimate,true_value) %>% 
+  group_by(true_value) %>% 
+  summarise(mean=mean(estimate))
+
 sim_results %>%
   select(estimate,true_value) %>% 
   group_by(true_value) %>% 
@@ -228,6 +253,13 @@ sim_results %>%
     y="Mean",
     title="The Mean of Estimate and True Value Distribution"
   )
+```
+*comment*
+
+From the plot, we can see the average of beta1_hat is approximately equal to the true value.
+
+
+```{r}
 
 sim_results %>%
   filter(decision=="reject null") %>%
@@ -243,7 +275,9 @@ sim_results %>%
   )
   
 ```
+*comment*
 
+When null hypothesis is rejected, the sample average of beta1_hat is not approximately to the true value of beta_1. This is because when beta1 is small, we reject by chance and when beta1 increases, the proportion of reject will also inrease.
 
 
 
