@@ -18,7 +18,6 @@ iris_with_missing = iris %>%
   map_df(~replace(.x, sample(1:150, 20), NA)) %>%
   mutate(Species = as.character(Species)) 
 
-mean(iris_with_missing$Sepal.Length,na.rm=T)
 
 fill_miss = function(x){
   
@@ -31,14 +30,14 @@ fill_miss = function(x){
 }
 
 iris_fill_miss = map(iris_with_missing,fill_miss) %>% bind_cols()
-iris_fill_miss %>% view
+iris_fill_miss 
 
 ```
 *comment*
 
 **iris**
 
-There are `r ncol(iris_fill_miss)` rows and `r nrow(iris_fill_miss)` columns in the `iris` dataset. The mean of `Sepal.Length` is `5.82`, `Sepal.Width` is `3.08`, `Petal.Length` is `3.77` and `Petal.Width` is `1.19`
+There are `r ncol(iris_fill_miss)` rows and `r nrow(iris_fill_miss)` columns in the `iris_fill_miss` dataset with 4 numeric variables ``r colnames(iris_fill_miss)[1:4]`` and 1 character variable ``r colnames(iris_fill_miss)[5]``.
 
 ## Problem 2
 ```{r}
@@ -71,8 +70,9 @@ longi_pivot %>%
   geom_line(aes(group=subject))+
   labs(
     color = "subject",
-    x="ID",
-    y="value"
+    x="Time",
+    y="value",
+    title = "Obeservations on Each Subject \nOver Time in Two Groups"
   )
 
 
@@ -107,7 +107,6 @@ sim_regression(0)
 ```
 
 
-### repeat
 ```{r}
 # 0
 output_0 = vector("list", 10000)
