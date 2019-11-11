@@ -33,6 +33,7 @@ iris_fill_miss = map(iris_with_missing,fill_miss) %>% bind_cols()
 iris_fill_miss 
 
 ```
+
 *comment*
 
 **iris**
@@ -78,6 +79,7 @@ longi_pivot %>%
 
 
 ```
+
 *comment*
 
 From the plot, we can see that control group will actually remain at a steady level while the experiment group will increase gradually.
@@ -253,6 +255,7 @@ sim_results %>%
     title="The Mean of Estimate and True Value Distribution"
   )
 ```
+
 *comment*
 
 From the plot, we can see the average of beta1_hat is approximately equal to the true value.
@@ -274,6 +277,7 @@ sim_results %>%
   )
   
 ```
+
 *comment*
 
 When null hypothesis is rejected, the sample average of beta1_hat is not approximately to the true value of beta_1. This is because when beta1 is small, we reject by chance and when beta1 increases, the proportion of reject will also inrease.
